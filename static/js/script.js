@@ -15,6 +15,6 @@ document.addEventListener("DOMContentLoaded", function() {
             })
             .catch(error => console.error("Ping失敗:", error));
             
-    // }, 600000); // 10分 = 10 * 60 * 1000 ミリ秒
-    }, 5000);
+    }, 600000); // 10分 = 10 * 60 * 1000 ミリ秒
+    // }, 5000);
 });
