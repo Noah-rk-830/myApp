@@ -1,26 +1,165 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flaskたたき台アプリ</title>
-    <style>
-        body { font-family: sans-serif; margin: 40px; background-color: #f4f4f9; }
-        .container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); max-width: 400px; }
-        input[type="text"] { width: 100%; padding: 8px; margin: 10px 0; box-sizing: border-radius; }
-        button { background-color: #007BFF; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; }
-        button:hover { background-color: #0056b3; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>myGame</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+
+    width:100vw;
+    height:100vh;
+
+    background:#444;
+    color:white;
+
+    font-family:"Yu Gothic","Meiryo",sans-serif;
+
+    overflow:hidden;
+
+}
+
+/*=========================
+    タイトル・メニュー全体
+=========================*/
+
+.main{
+
+    width:100%;
+    height:100%;
+
+    display:flex;
+    flex-direction:column;
+
+    justify-content:center;
+    align-items:center;
+
+    gap:120px;
+
+}
+
+/*=========================
+    タイトル
+=========================*/
+
+.title{
+
+    font-size:56px;
+    font-weight:normal;
+
+}
+
+/*=========================
+    メニュー枠
+=========================*/
+
+.menu{
+
+    border:3px solid #ddd;
+    border-radius:8px;
+
+    padding:12px;
+
+}
+
+/*=========================
+    リスト
+=========================*/
+
+.menu ul{
+
+    list-style:none;
+
+}
+
+.menu li{
+
+    width:120px;
+
+    padding:8px 6px;
+
+    margin:4px 0;
+
+    font-size:20px;
+
+    border:1px solid transparent;
+
+    user-select:none;
+
+}
+
+/* 選択中 */
+
+.menu li.selected{
+
+    border:1px solid white;
+
+}
+
+/*=========================
+    バージョン
+=========================*/
+
+.version{
+
+    position:fixed;
+
+    left:20px;
+    bottom:20px;
+
+    font-size:18px;
+
+}
+
+</style>
+
 </head>
+
 <body>
-    <div class="container">
-        <h2>Flaskアプリのたたき台</h2>
-        <form action="/greet" method="POST">
-            <label for="username">お名前を入力してください：</label>
-            <input type="text" id="username" name="username" placeholder="例：山田太郎" required>
-            <button type="submit">送信する</button>
-        </form>
+
+<div class="main">
+
+    <div class="title">
+        myGame
     </div>
-    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+
+    <div class="menu">
+
+        <ul id="menuList">
+
+            <li class="selected" data-action="new">
+                ニューゲーム
+            </li>
+
+            <li data-action="load">
+                ロード
+            </li>
+
+            <li data-action="option">
+                オプション
+            </li>
+
+        </ul>
+
+    </div>
+
+</div>
+
+<div class="version">
+    Ver. 1.0.3.0
+</div>
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+<script src="{{ url_for('static', filename='js/title.js') }}"></script>
+
 </body>
 </html>
