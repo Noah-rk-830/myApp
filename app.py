@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request
+import os
 
 app = Flask(__name__)
 
@@ -21,5 +22,7 @@ def greet():
     return render_template('result.html', name=user_name)
 
 if __name__ == '__main__':
-    # debug=True にすると、コードを変更したときに自動でアプリが再起動して便利です
-    app.run(debug=True)
+    # Render環境のポート番号を取得、なければ5000番を使う
+    port = int(os.environ.get('PORT', 5000))
+    # host='0.0.0.0' にすることで、外部からのアクセスを受け付けます
+    app.run(host='0.0.0.0', port=port)
