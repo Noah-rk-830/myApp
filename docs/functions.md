@@ -16,8 +16,8 @@
 ## static/js/script.js（全ページ共通）
 
 ### 処理1：Renderスリープ対策 ping
-- **役割**：Renderの無料枠でサーバーがスリープしないよう、10分おきに `/ping` へGETリクエストを送る
-- **実装**：`setInterval` + `fetch('/ping')`
+- **役割**：Renderの無料枠でサーバーがスリープしないよう、10分おきに `/` へGETリクエストを送る
+- **実装**：`setInterval` + `fetch('/')`
 - **間隔**：600,000ms（10分）
 
 ---
