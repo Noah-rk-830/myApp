@@ -7,9 +7,7 @@ const menuItems = document.querySelectorAll("#menuList li");
 // 現在選択中のメニュー番号
 let selectedIndex = 0;
 
-/****************************************
-    選択表示更新
-****************************************/
+// 選択表示更新
 function updateSelection() {
 
     menuItems.forEach(item => {
@@ -20,81 +18,57 @@ function updateSelection() {
 
 }
 
-/****************************************
-    メニュー決定処理
-****************************************/
+// メニュー決定処理
 function executeMenu() {
 
     const action = menuItems[selectedIndex].dataset.action;
 
     switch (action) {
-
         case "new":
-            // ゲーム開始画面へ
-            // location.href = "/game";
-            alert("ニューゲーム");
+            location.replace("/new");
             break;
 
         case "load":
-            // ロード画面へ
-            // location.href = "/load";
-            alert("ロード");
+            location.replace("/load");
             break;
 
         case "option":
-            // オプション画面へ
-            // location.href = "/option";
-            alert("オプション");
+            location.replace("/option");
             break;
-
     }
-
 }
 
-/****************************************
-    キーボード操作
-****************************************/
+// キーボード操作
 document.addEventListener("keydown", function (e) {
 
     switch (e.key) {
-
         case "ArrowUp":
-
             selectedIndex--;
-
             if (selectedIndex < 0) {
                 selectedIndex = menuItems.length - 1;
             }
-
             updateSelection();
             e.preventDefault();
             break;
 
         case "ArrowDown":
-
             selectedIndex++;
-
             if (selectedIndex >= menuItems.length) {
                 selectedIndex = 0;
             }
-
             updateSelection();
             e.preventDefault();
             break;
 
         case "Enter":
-
             executeMenu();
             e.preventDefault();
             break;
-
     }
 
 });
 
-/****************************************
-    マウス操作
-****************************************/
+// マウス操作
 menuItems.forEach((item, index) => {
 
     // マウスを乗せたら選択
@@ -117,7 +91,5 @@ menuItems.forEach((item, index) => {
 
 });
 
-/****************************************
-    初期表示
-****************************************/
+// 初期表示
 updateSelection();

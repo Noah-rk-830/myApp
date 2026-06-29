@@ -17,4 +17,11 @@ document.addEventListener("DOMContentLoaded", function() {
             
     }, 600000); // 10分 = 10 * 60 * 1000 ミリ秒
     // }, 5000);
+
+    // BFCache対策（戻る/進むで復元されたときに初期化を再実行）
+    window.addEventListener('pageshow', function (event) {
+        if (event.persisted) {
+            initPage();
+        }
+    });
 });
