@@ -5,6 +5,7 @@
 function executeMenu() {
 
     const action = menuItems[selectedIndex].dataset.action;
+    sessionStorage.setItem('prevPage', location.pathname);
 
     switch (action) {
         case "new":
