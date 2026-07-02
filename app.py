@@ -9,7 +9,7 @@ app = Flask(__name__)
 def index():
     with open('data/system.json', encoding='utf-8') as f:
         system = json.load(f)
-    return render_template('index.html', version=system['version'])
+    return render_template('index.html', title=system['title'], version=system['version'])
 
 # フォームが送信されたときの処理
 @app.route('/greet', methods=['POST'])
