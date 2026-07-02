@@ -1,3 +1,4 @@
+import json
 from flask import Flask, render_template, request
 import os
 
@@ -6,7 +7,9 @@ app = Flask(__name__)
 # トップ画面（アクセスしたときに最初に表示されるページ）
 @app.route('/')
 def index():
-    return render_template('index.html')
+    with open('data/system.json', encoding='utf-8') as f:
+        system = json.load(f)
+    return render_template('index.html', version=system['version'])
 
 # フォームが送信されたときの処理
 @app.route('/greet', methods=['POST'])
