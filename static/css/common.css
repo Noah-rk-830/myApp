@@ -1,0 +1,17 @@
+/* ===========================
+   共通：色・フォント
+=========================== */
+
+body {
+  background: #444;
+  color: white;
+  font-family: "Yu Gothic", "Meiryo", sans-serif;
+}
+
+.menu {
+  border-color: #ddd;
+}
+
+.menu li.selected {
+  border-color: white;
+}
