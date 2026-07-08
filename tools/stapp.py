@@ -6,8 +6,6 @@ import streamlit as st
 DEFAULT_CONVERT_RATIO = 0.1  # 変換させる文字数の割合の初期値(10%)
 MODE_OPTIONS = {
   "記号に変換": "symbol",
-  "大文字に変換": "upper",
-  "アルファベットをランダム置換": "random_alpha",
   "文字化け": "mojibake",
 }
 
@@ -24,69 +22,42 @@ def convert_random_chars_to_symbols(text, ratio, symbols):
   Returns:
     str: 一部の文字が記号に置き換えられたテキスト
   """
-  return _convert_random_chars(text, ratio, lambda: random.choice(symbols))
-
-
-def convert_random_chars_to_upper(text, ratio):
-  """
-  テキスト中の文字をランダムに選び、指定した割合だけ大文字に置き換える
-
-  Args:
-    text (str): 変換対象のテキスト
-    ratio (float): 変換する文字の割合(0.0〜1.0)
-
-  Returns:
-    str: 一部の文字が大文字に置き換えられたテキスト
-  """
   chars = list(text)
   target_indices = [i for i, c in enumerate(chars) if not c.isspace()]
   convert_count = int(len(target_indices) * ratio)
   convert_indices = random.sample(target_indices, convert_count) if convert_count > 0 else []
 
   for i in convert_indices:
-    chars[i] = chars[i].upper()
+    chars[i] = random.choice(symbols)
 
   return "".join(chars)
 
 
-def convert_random_chars_to_random_alpha(text, ratio):
+def mojibake_text(text):
   """
-  テキスト中の文字をランダムに選び、指定した割合だけランダムなアルファベットに置き換える
+  テキスト全体をUTF-8バイト列にエンコードし、それをShift-JISとして誤読(decode)した場合に
+  再現される文字化け文字列に変換する
+
+  テキスト全体をまとめて変換することで、実際の文字化け現象(前後の文字とバイト列がずれて
+  結合することで起きる連続した誤読)を再現する
+
+  変換できない(Shift-JISとして不正なバイト列になる)場合は、
+  デコード可能な範囲まで変換し、残りは固定のフォールバック記号("�")に置き換える
 
   Args:
     text (str): 変換対象のテキスト
-    ratio (float): 変換する文字の割合(0.0〜1.0)
 
   Returns:
-    str: 一部の文字がランダムなアルファベットに置き換えられたテキスト
+    str: 文字化けを再現した文字列
   """
-  return _convert_random_chars(text, ratio, lambda: random.choice(string.ascii_letters))
-
-
-def mojibake_char(char):
-  """
-  1文字をUTF-8バイト列にエンコードし、それをShift-JISとして誤読(decode)した場合に
-  再現される文字化け文字列に変換する
-
-  変換できない(Shift-JISとして不正なバイト列になる、または対応する文字がない)場合は、
-  元の文字をそのまま返す
-
-  Args:
-    char (str): 変換対象の1文字
-
-  Returns:
-    str: 文字化けを再現した文字列(失敗時は元の文字)
-  """
-  try:
-    utf8_bytes = char.encode("utf-8")
-    return utf8_bytes.decode("shift_jis")
-  except (UnicodeDecodeError, UnicodeEncodeError):
-    return char
+  utf8_bytes = text.encode("utf-8")
+  return utf8_bytes.decode("shift_jis", errors="replace")
 
 
 def convert_random_chars_to_mojibake(text, ratio):
   """
-  テキスト中の文字をランダムに選び、指定した割合だけ
+  テキスト中の文字をランダムに選び、指定した割合の文字を対象として、
+  対象文字を「連続する区間」にまとめたうえで、区間ごとにテキスト全体変換方式で
   「UTF-8バイト列をShift-JISとして誤読した場合の文字化け」に置き換える
 
   Args:
@@ -94,39 +65,42 @@ def convert_random_chars_to_mojibake(text, ratio):
     ratio (float): 変換する文字の割合(0.0〜1.0)
 
   Returns:
-    str: 一部の文字が文字化け文字列に置き換えられたテキスト
-  """
-  return _convert_random_chars(text, ratio, None, char_transform=mojibake_char)
-
-
-def _convert_random_chars(text, ratio, choice_func, char_transform=None):
-  """
-  テキスト中の文字をランダムに選び、指定した割合だけ変換する共通処理
-
-  choice_func が指定された場合は「対象文字を choice_func() の結果に置き換える」方式、
-  char_transform が指定された場合は「対象文字自体を char_transform(元の文字) に変換する」方式で処理する
-
-  Args:
-    text (str): 変換対象のテキスト
-    ratio (float): 変換する文字の割合(0.0〜1.0)
-    choice_func (callable | None): 置換後の1文字(または文字列)を返す関数
-    char_transform (callable | None): 元の文字を受け取り、変換後の文字列を返す関数
-
-  Returns:
-    str: 一部の文字が変換されたテキスト
+    str: 一部の区間が文字化け文字列に置き換えられたテキスト
   """
   chars = list(text)
   target_indices = [i for i, c in enumerate(chars) if not c.isspace()]
   convert_count = int(len(target_indices) * ratio)
-  convert_indices = random.sample(target_indices, convert_count) if convert_count > 0 else []
 
-  for i in convert_indices:
-    if char_transform is not None:
-      chars[i] = char_transform(chars[i])
+  if convert_count <= 0:
+    return text
+
+  convert_indices = set(random.sample(target_indices, convert_count))
+
+  # 対象インデックスを「連続する区間」にまとめる
+  ranges = []
+  start = None
+  for i in range(len(chars)):
+    if i in convert_indices:
+      if start is None:
+        start = i
     else:
-      chars[i] = choice_func()
+      if start is not None:
+        ranges.append((start, i))  # [start, i)
+        start = None
+  if start is not None:
+    ranges.append((start, len(chars)))
 
-  return "".join(chars)
+  # 区間ごとにテキスト全体をまとめて文字化け変換する
+  result_parts = []
+  cursor = 0
+  for start, end in ranges:
+    result_parts.append("".join(chars[cursor:start]))
+    segment = "".join(chars[start:end])
+    result_parts.append(mojibake_text(segment))
+    cursor = end
+  result_parts.append("".join(chars[cursor:]))
+
+  return "".join(result_parts)
 
 
 def convert_text(text, ratio, mode, symbols):
@@ -136,7 +110,7 @@ def convert_text(text, ratio, mode, symbols):
   Args:
     text (str): 変換対象のテキスト
     ratio (float): 変換する文字の割合(0.0〜1.0)
-    mode (str): 変換モード("symbol", "upper", "random_alpha", "mojibake")
+    mode (str): 変換モード("symbol","mojibake")
     symbols (list[str]): 記号モード時に使用する記号の配列
 
   Returns:
@@ -144,10 +118,6 @@ def convert_text(text, ratio, mode, symbols):
   """
   if mode == "symbol":
     return convert_random_chars_to_symbols(text, ratio, symbols)
-  elif mode == "upper":
-    return convert_random_chars_to_upper(text, ratio)
-  elif mode == "random_alpha":
-    return convert_random_chars_to_random_alpha(text, ratio)
   elif mode == "mojibake":
     return convert_random_chars_to_mojibake(text, ratio)
   else:
@@ -192,4 +162,4 @@ def render_app(default_ratio, mode_options, default_symbols):
 
 
 # 呼び出し
-render_app(DEFAULT_CONVERT_RATIO, MODE_OPTIONS, ["■", "%", "&", "#", "!"])
+render_app(DEFAULT_CONVERT_RATIO, MODE_OPTIONS, ["■","％","＆","＃","！"])
